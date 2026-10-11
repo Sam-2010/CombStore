@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <title>CloudMesh OAuth Callback</title>
+</head>
+<body style="font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; background: #0b0f19; color: #fff; margin: 0;">
+  <div style="text-align: center;">
+    <h3 style="margin-bottom: 8px;">Authenticating with CloudMesh...</h3>
+    <p style="color: #94a3b8; font-size: 14px;">This window will close automatically.</p>
+  </div>
+  <script>
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      const error = params.get('error');
+      const error_description = params.get('error_description');
+
+      const message = {
+        type: 'OAUTH_RESPONSE',
+        code,
+        state,
+        error,
+        error_description
+      };
+
+      try {
+        const channel = new BroadcastChannel('cloudmesh_oauth_channel');
+        channel.postMessage(message);
+        channel.close();
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (window.opener) {
+        window.opener.postMessage(message, window.location.origin);
+      }
+
+      setTimeout(() => {
+        window.close();
+      }, 500);
+    })();
+  </script>
+</body>
+</html>
